@@ -11,7 +11,7 @@ on:
 jobs:
   style:
     name: Python linting
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.9
@@ -33,7 +33,7 @@ jobs:
 
   test:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
