@@ -13,8 +13,9 @@ RUN apt-get update && apt-get install -y ca-certificates gnupg software-properti
 # Install Python 3.12 and python3-pip
 RUN apt-get install -y python3.12 python3.12-venv python3.12-dev python3-pip
 
-ADD requirements.txt .
-ADD requirements.dev.txt .
+# Copy requirements files
+COPY ../requirements.txt /app/requirements.txt
+COPY ../requirements.dev.txt /app/requirements.dev.txt
 
 # Upgrade pip using Python 3.12 to ensure compatibility
 RUN python3.12 -m pip install --upgrade pip
@@ -22,6 +23,9 @@ RUN python3.12 -m pip install --upgrade pip
 # Use Python 3.12's pip to install dependencies from requirements files
 RUN python3.12 -m pip install --no-cache-dir -r requirements.txt -r requirements.dev.txt
 
-ADD test ./
+# Copy test files
+COPY . /app/test
+
+WORKDIR /app/test
 
 ENTRYPOINT ["python3.12", "integration.py"]
