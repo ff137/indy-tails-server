@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 
-# Note: libindy is a dependency for tests, and it's easiest to install on ubuntu images 
+# Note: libindy is a dependency for tests, and it's easiest to install on ubuntu images
 # using debian from python base images doesn't allow following steps to work, so build from ubuntu:24.04
 
 # Install ca-certificates and add the Sovrin repository key
@@ -10,18 +10,18 @@ RUN apt-get update && apt-get install -y ca-certificates gnupg software-properti
     apt-get update && \
     apt-get install -y libindy
 
-# Install Python 3.9 and python3-pip
-RUN apt-get install -y python3.9 python3.9-venv python3.9-dev python3-pip
+# Install Python 3.12 and python3-pip
+RUN apt-get install -y python3.12 python3.12-venv python3.12-dev python3-pip
 
 ADD requirements.txt .
 ADD requirements.dev.txt .
 
-# Upgrade pip using Python 3.9 to ensure compatibility
-RUN python3.9 -m pip install --upgrade pip
+# Upgrade pip using Python 3.12 to ensure compatibility
+RUN python3.12 -m pip install --upgrade pip
 
-# Use Python 3.9's pip to install dependencies from requirements files
-RUN python3.9 -m pip install --no-cache-dir -r requirements.txt -r requirements.dev.txt
+# Use Python 3.12's pip to install dependencies from requirements files
+RUN python3.12 -m pip install --no-cache-dir -r requirements.txt -r requirements.dev.txt
 
 ADD test ./
 
-ENTRYPOINT ["python3.9", "integration.py"]
+ENTRYPOINT ["python3.12", "integration.py"]
