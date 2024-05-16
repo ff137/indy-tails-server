@@ -84,7 +84,7 @@ async def register_issuer_did(pool):
     req = indy_vdr.ledger.build_nym_request(
         steward_did, issuer_did, verkey=issuer_verkey, role="ENDORSER"
     )
-    resp = await pool.submit_request(sign_request(req, steward_seed))
+    await pool.submit_request(sign_request(req, steward_seed))
 
 
 async def create_issuer_wallet():
