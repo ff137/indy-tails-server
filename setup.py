@@ -26,7 +26,7 @@ if __name__ == "__main__":
         version=VERSION,
         long_description=long_description,
         long_description_content_type="text/markdown",
-        url="https://github.com/nrempel/tails-server",
+        url="https://github.com/bcgov/indy-tails-server",
         packages=find_packages(),
         include_package_data=True,
         package_data={"tails_server": ["requirements.txt"]},
