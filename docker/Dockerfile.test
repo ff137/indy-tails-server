@@ -3,25 +3,65 @@ FROM ubuntu:24.04
 # Note: libindy is a dependency for tests, and it's easiest to install on ubuntu images
 # using debian from python base images doesn't allow following steps to work, so build from ubuntu:24.04
 
-# Install ca-certificates and add the Sovrin repository key
-RUN apt-get update && apt-get install -y ca-certificates gnupg software-properties-common && \
-    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CE7709D068DB5E88 && \
-    add-apt-repository "deb https://repo.sovrin.org/sdk/deb bionic stable" && \
-    apt-get update && \
-    apt-get install -y libindy
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Install Python 3.12 and python3-pip
-RUN apt-get install -y python3.12 python3.12-venv python3.12-dev python3-pip
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    gnupg \
+    software-properties-common \
+    curl \
+    git \
+    build-essential \
+    libssl-dev \
+    pkg-config \
+    tzdata \
+    python3.12 \
+    python3.12-venv \
+    python3.12-dev \
+    python3-pip
+
+# Install Rust (required for building indylib if not using precompiled binaries)
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+RUN apt-get update && apt-get install -y apt-file
+RUN apt-file update
+
+# Update apt-file and locate OpenSSL files
+RUN export OPENSSL_LIB_DIR=$(apt-file list libssl-dev | grep libssl.a | awk '{ print $2 }' | xargs dirname | head -n 1) && \
+    export OPENSSL_INCLUDE_DIR=$(apt-file list libssl-dev | grep openssl | awk '{ print $2 }' | xargs dirname | head -n 1) && \
+    echo "OPENSSL_LIB_DIR=$OPENSSL_LIB_DIR" && \
+    echo "OPENSSL_INCLUDE_DIR=$OPENSSL_INCLUDE_DIR"
+
+# Install rustup and set up the stable toolchain
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN rustup default stable
+
+# Set OpenSSL environment variables
+ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
+
+RUN apt-get update && apt-get install libzmq3-dev -y
+
+# Clone the repo and build from source
+RUN git clone https://github.com/ff137/indy-sdk.git && \
+    cd indy-sdk && \
+    git checkout update && \
+    cd libindy && \
+    cargo build --release && \
+    cp target/release/libindy.so /usr/local/lib/ && \
+    ldconfig
 
 # Copy requirements files
 COPY ../requirements.txt /app/requirements.txt
 COPY ../requirements.dev.txt /app/requirements.dev.txt
 
-# Upgrade pip using Python 3.12 to ensure compatibility
-RUN python3.12 -m pip install --upgrade pip
-
-# Use Python 3.12's pip to install dependencies from requirements files
-RUN python3.12 -m pip install --no-cache-dir -r requirements.txt -r requirements.dev.txt
+# Create a virtual environment and install dependencies
+RUN python3.12 -m venv /app/venv
+ENV PATH="/app/venv/bin:${PATH}"
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r /app/requirements.txt -r /app/requirements.dev.txt
 
 # Copy test files
 COPY . /app/test
