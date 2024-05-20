@@ -58,7 +58,7 @@ def get_settings():
     settings = {}
 
     settings["host"] = args.host
-    settings["port"] = args.port
+    settings["port"] = int(args.port)
 
     settings["log_config"] = args.log_config
     settings["log_level"] = args.log_level
