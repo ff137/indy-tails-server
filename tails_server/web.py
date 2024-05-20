@@ -241,6 +241,6 @@ def start(settings):
 
     web.run_app(
         app,
-        host=settings.get("host") or DEFAULT_WEB_HOST,
-        port=settings.get("port") or DEFAULT_WEB_PORT,
+        host=settings.get("host", DEFAULT_WEB_HOST),
+        port=settings.get("port", DEFAULT_WEB_PORT),
     )
