@@ -64,7 +64,7 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r /app/requirements.txt -r /app/requirements.dev.txt
 
 # Copy test files
-COPY . /app/test
+COPY ../test/integration.py /app/test/integration.py
 
 WORKDIR /app/test
 
