@@ -1,16 +1,20 @@
-FROM python:3.12
+FROM python:3.12-slim
 
-ADD requirements.txt .
-ADD requirements.dev.txt .
+WORKDIR /app
 
-RUN pip3 install --upgrade pip
-RUN pip3 install --no-cache-dir -r requirements.txt -r requirements.dev.txt
+COPY ../requirements.txt .
+COPY ../requirements.dev.txt .
 
-ADD tails_server ./tails_server
-ADD bin ./bin
-ADD README.md ./
-ADD setup.py ./
+# Upgrade pip and install the dependencies
+RUN pip3 install --upgrade pip && \
+    pip3 install --no-cache-dir -r requirements.txt -r requirements.dev.txt
 
+COPY ../tails_server ./tails_server
+COPY ../bin ./bin
+COPY ../README.md ./
+COPY ../setup.py ./
+
+# Install the application
 RUN pip3 install --no-cache-dir -e .
 
 ENTRYPOINT ["/bin/bash", "-c", "tails-server \"$@\""]
