@@ -55,6 +55,8 @@ jobs:
           ./manage start
 
       - name: Build and run tests
+        env:
+          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
         run: |
           cd indy-tails-server/docker
           chmod +x ./manage
