@@ -12,6 +12,11 @@ services:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     volumes:
       - ./ngrok.yml:/etc/ngrok.yml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4040"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   tails-server:
     build:
       context: ..
@@ -26,9 +31,17 @@ services:
         --port 6543
         --storage-path $STORAGE_PATH
         --log-level $LOG_LEVEL
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6543"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
   tester:
     build:
       context: ..
       dockerfile: docker/Dockerfile.test
+    depends_on:
+      tails-server:
+        condition: service_healthy
 networks:
   tails-server:
