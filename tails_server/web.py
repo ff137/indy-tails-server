@@ -105,7 +105,7 @@ async def put_file(request):
             genesis_txn_bytes, revocation_reg_id, storage_path
         )
     except BadGenesisError:
-        LOGGER.debug(f"Received invalid genesis transactions")
+        LOGGER.debug("Received invalid genesis transactions")
         raise web.HTTPBadRequest(text="Genesis transactions are not valid.")
     except BadRevocationRegistryIdError:
         LOGGER.debug(f"Revocation registry id is not valid: {revocation_reg_id}")
@@ -241,6 +241,6 @@ def start(settings):
 
     web.run_app(
         app,
-        host=settings.get("host") or DEFAULT_WEB_HOST,
-        port=settings.get("port") or DEFAULT_WEB_PORT,
+        host=settings.get("host", DEFAULT_WEB_HOST),
+        port=settings.get("port", DEFAULT_WEB_PORT),
     )

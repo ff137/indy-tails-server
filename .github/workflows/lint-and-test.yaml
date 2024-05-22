@@ -11,19 +11,19 @@ on:
 jobs:
   style:
     name: Python linting
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python 3.9
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.12
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install \
             isort~=5.13.2 \
-            black~=24.2.0
+            black~=24.4.2
       - name: Check import style with isort
         run: |
           isort . --check --profile black --diff
@@ -33,7 +33,7 @@ jobs:
 
   test:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,6 +55,8 @@ jobs:
           ./manage start
 
       - name: Build and run tests
+        env:
+          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
         run: |
           cd indy-tails-server/docker
           chmod +x ./manage
