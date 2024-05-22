@@ -7,6 +7,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
+    apt-file \
     ca-certificates \
     gnupg \
     software-properties-common \
@@ -14,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     libssl-dev \
+    libzmq3-dev \
     pkg-config \
     tzdata \
     python3.12 \
@@ -21,30 +23,19 @@ RUN apt-get update && apt-get install -y \
     python3.12-dev \
     python3-pip
 
-# Install Rust (required for building indylib if not using precompiled binaries)
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-RUN apt-get update && apt-get install -y apt-file
-RUN apt-file update
-
-# Update apt-file and locate OpenSSL files
-RUN export OPENSSL_LIB_DIR=$(apt-file list libssl-dev | grep libssl.a | awk '{ print $2 }' | xargs dirname | head -n 1) && \
-    export OPENSSL_INCLUDE_DIR=$(apt-file list libssl-dev | grep openssl | awk '{ print $2 }' | xargs dirname | head -n 1) && \
-    echo "OPENSSL_LIB_DIR=$OPENSSL_LIB_DIR" && \
-    echo "OPENSSL_INCLUDE_DIR=$OPENSSL_INCLUDE_DIR"
-
 # Install rustup and set up the stable toolchain
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 RUN rustup default stable
 
-# Set OpenSSL environment variables
-ENV PKG_CONFIG_PATH=/usr/lib/pkgconfig
+# Update apt-file and locate OpenSSL files
+RUN apt-file update
+RUN export OPENSSL_LIB_DIR=$(apt-file list libssl-dev | grep libssl.a | awk '{ print $2 }' | xargs dirname | head -n 1) && \
+    export OPENSSL_INCLUDE_DIR=$(apt-file list libssl-dev | grep openssl | awk '{ print $2 }' | xargs dirname | head -n 1) && \
+    echo "OPENSSL_LIB_DIR=$OPENSSL_LIB_DIR" && \
+    echo "OPENSSL_INCLUDE_DIR=$OPENSSL_INCLUDE_DIR"
 
-RUN apt-get update && apt-get install libzmq3-dev -y
-
-# Clone the repo and build from source
+# Clone the indy-sdk repo and build from source
 RUN git clone https://github.com/ff137/indy-sdk.git && \
     cd indy-sdk && \
     git checkout update && \
